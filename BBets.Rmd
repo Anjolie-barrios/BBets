@@ -1,6 +1,6 @@
 ---
 title: "Brownlows Bets"
-author: "Your Name"
+author: "Anjolie Barrios"
 date: "Year 2020"
 output: 
   html_document:
@@ -30,11 +30,34 @@ There are 3 questions and there should be at least 3 separate commits, at least 
 2. For what size class is a 2:1 odds bet fair.
 3. How much money would Brownlow be expected to end up with if the bets went as described.
 
-# What are the fair odds  
-
-
+# What are the fair odds: Methods
 <!--Decide on your methods:  In this section explain the approach you will take to attack the issue --- how will you decide on a likely estimate of professor Brownlow's earnings or losses after 637 bets. Also explain how you construct a 95% confidence interval about your estimate of his winnings !-->
+When there 35 people in the class, there are 36 possibilities:  
+P(0) = no one shares birthdays.  
+P(1) = 1 person "shares" a birthday with themselves. In reality, no shares birthdays. 
+P(2) = 2 people have shared birthdays.  
+P(3) = 3 people have shared birthdays, and so on, until
+P(35) = everyone has the same birthday.  
+  
+Prof. Barlow, however, is betting on AT LEAST two people having matching birthdays, so the chance we want to calculate is actually P(at least 2) or P(2+).  Knowing P(0,1) will complete the equation below.  
+P(2+) = 1 - P(0,1), since P(2+) is the converse of P(0,1)  
+  
+To find P(0,1):    
+There are exactly 365.24 days of the year, so the first person has a 1/365.24 chance of having a certain birthday. The second person has a 1/364.24 chance of a UNIQUE birthday (since 1 bday was already taken). When n = the number of students, the process continues to make this equation:  
+P(0,1) = [365.24 * (365.24 - 1) * (365.24 - 2) ... (366.24 - n)] / (365.24)  
+Note that part of the equation is 366.24 - n. This is a simplification of 365.24 - (n-1).  
+  
+After P(2+) is found for n = 35, the number of successful bets can be estimated using the number of total bets, which is 637. (Note that P(2+) is a value between 0 and 1.)  
+Successful bets = P(2+) * 637  
+  
+For every success, he gets $2. For every fail, he looses $1. If S = number of successful bets and F = number of failed bets, then:  
+2S - F = net amount of money gained/lost, in dollars.  
 
+In order to calculate 95% confidence interval, we need to put the info into a dataset with these variables: n or No_ofStudents, P(0,1) or betFail_chance, P(2+) or betWin_chance, successfulBets, failedBets, and netProfit. 
+
+##1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
+0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
+This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708 or rounded to ~19: ~81.  
 
 # What size of class makes the 2:1 bet fair?  
 <!--Explain and display the results of your method of coming up with the estimate of professor Brownlows betting profits!-->
