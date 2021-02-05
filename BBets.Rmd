@@ -43,7 +43,7 @@ Prof. Barlow, however, is betting on AT LEAST two people having matching birthda
 P(2+) = 1 - P(0,1), since P(2+) is the converse of P(0,1)  
   
 To find P(0,1):    
-There are exactly 365.24 days of the year, so the first person has a 1/365.24 chance of having a certain birthday. The second person has a 1/364.24 chance of a UNIQUE birthday (since 1 bday was already taken). When n = the number of students, the process continues to make this equation:  
+There are exactly 365.24 days of the year, so the first person has a 1/365.24 chance of having a certain birthday. The next person has a 1/364.24 chance of a UNIQUE birthday (since 1 bday was already taken). When n = the number of students, the process continues to make this equation:  
 P(0,1) = [365.24 * (365.24 - 1) * (365.24 - 2) ... (366.24 - n)] / (365.24)  
 Note that part of the equation is 366.24 - n. This is a simplification of 365.24 - (n-1).  
   
