@@ -57,7 +57,7 @@ In order to calculate 95% confidence interval, we need to put the info into a da
 
 ##1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
 0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
-This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708 or rounded to ~19: ~81.  
+This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708, rounded to ~19: ~81, and rounded again to be 1:4. 
 
 # What size of class makes the 2:1 bet fair?  
 <!--Explain and display the results of your method of coming up with the estimate of professor Brownlows betting profits!-->
