@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 require(tidyverse)
 require(knitr)
+read.csv(file = "BbetsFinal.csv")
 ```
 
 
@@ -53,9 +54,9 @@ Successful bets = P(2+) * 637
 For every success, he gets $2. For every fail, he looses $1. If S = number of successful bets and F = number of failed bets, then:  
 2S - F = net amount of money gained/lost, in dollars.  
 
-In order to calculate 95% confidence interval, we need to put the info into a dataset with these variables: n or No_ofStudents, P(0,1) or betFail_chance, P(2+) or betWin_chance, successfulBets, failedBets, and netProfit. 
+In order to calculate 95% confidence interval, we need to put the info into a dataset with these variables: n or No_ofStudents, P(0,1) or betFail_chance, P(2+) or betWin_chance, successfulBets, failedBets, and netProfit. More importantly, however, we will use a resampling approach. 
 
-##1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
+## 1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
 0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
 This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708, rounded to ~19: ~81, and rounded again to be 1:4. 
 
