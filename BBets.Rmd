@@ -13,6 +13,16 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 require(tidyverse)
 require(knitr)
+require(rlang)
+require(mosaic)
+require(lattice)
+read.csv(file = "BbetsFinal.csv")
+
+#define increment function
+inc <- function(x)
+{
+ eval.parent(substitute(x <- x + 1))
+}
 ```
 
 
@@ -30,11 +40,139 @@ There are 3 questions and there should be at least 3 separate commits, at least 
 2. For what size class is a 2:1 odds bet fair.
 3. How much money would Brownlow be expected to end up with if the bets went as described.
 
-# What are the fair odds  
-
-
+# What are the fair odds: Methods
 <!--Decide on your methods:  In this section explain the approach you will take to attack the issue --- how will you decide on a likely estimate of professor Brownlow's earnings or losses after 637 bets. Also explain how you construct a 95% confidence interval about your estimate of his winnings !-->
+When there 35 people in the class, there are 36 possibilities:  
+P(0) = no one shares birthdays.  
+P(1) = 1 person "shares" a birthday with themselves. In reality, no shares birthdays. 
+P(2) = 2 people have shared birthdays.  
+P(3) = 3 people have shared birthdays, and so on, until
+P(35) = everyone has the same birthday.  
+  
+Prof. Barlow, however, is betting on AT LEAST two people having matching birthdays, so the chance we want to calculate is actually P(at least 2) or P(2+).  Knowing P(0,1) will complete the equation below.  
+P(2+) = 1 - P(0,1), since P(2+) is the converse of P(0,1)  
+  
+To find P(0,1):    
+There are exactly 365.24 days of the year, so the first person has a 1/365.24 chance of having a certain birthday. The next person has a 1/364.24 chance of a UNIQUE birthday (since 1 bday was already taken). When n = the number of students, the process continues to make this equation:  
+P(0,1) = [365.24 * (365.24 - 1) * (365.24 - 2) ... (366.24 - n)] / (365.24)  
+Note that part of the equation is 366.24 - n. This is a simplification of 365.24 - (n-1).  
+  
+After P(2+) is found for n = 35, the number of successful bets can be estimated using the number of total bets, which is 637. (Note that P(2+) is a value between 0 and 1.)  
+Successful bets = P(2+) * 637  
+  
+For every success, he gets $2. For every fail, he loses $1. If S = number of successful bets and F = number of failed bets, then:  
+2S - F = net amount of money gained/lost, in dollars.  
 
+In order to calculate 95% confidence interval, we need to put the info into a dataset with these variables: n or No_ofStudents, P(0,1) or betFail_chance, P(2+) or betWin_chance, successfulBets, failedBets, and netProfit. More importantly, however, we will use a resampling approach.  
+
+## 1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
+### odds by calculation
+0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
+This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708, rounded to ~19: ~81, and rounded again to be 1:4.  
+### odds by automated trials
+```{r}
+#set counts to zero
+BWinCount = 0
+BLoseCount = 0
+TotalTrials = 0
+```
+
+```{r}
+#define "birthdays"
+birthdays <- sequence(c(365), from = 1, to = 365)
+#leap birthdays
+leap_birthdays <- sequence(c(366), from = 1, to = 366)
+
+#define function
+birthSamp <- function(x, n, replace=TRUE) {
+#n= number of students, x= sequence (leap or none)
+sample <- sample(x, n, replace = TRUE)
+sort <- sort(sample)
+sortdupe <- duplicated(sort)
+#sum the number of duplicates
+SumsortDupe <- sum(sortdupe)
+#brownlow wins or loses, boolean
+if (SumsortDupe > 0) {
+BrownlowWin = TRUE
+}else {
+BrownlowWin = FALSE
+}
+
+#win/lose counts. For some reason they have to be "switched", otherwise "lose count" will show wins and vice versa. 
+if (!isTRUE(BrownlowWin)) {
+eval.parent(substitute(BLoseCount <- BLoseCount + 1))
+}else {
+eval.parent(substitute(BWinCount <- BWinCount + 1))
+}
+eval.parent(substitute(TotalTrials <- TotalTrials + 1))
+  return(BrownlowWin)
+}
+```
+
+```{r}
+#for every 3 "normal" years, 1 leap year
+birthSamp(birthdays, n=35)
+birthSamp(birthdays, n=35)
+birthSamp(birthdays, n=35)
+birthSamp(leap_birthdays, n=35)
+
+#No. of times Barnlow has won and lost.
+print(BWinCount)
+print(BLoseCount)
+print(TotalTrials)
+
+#j = num of batches
+j = 0
+jn = 0
+
+winanswer=vector("numeric")
+while(jn<1001){
+for(j in 1:1000){
+BWinCount = 0
+BLoseCount = 0
+TotalTrials = 0
+#batch of 637 trials
+while (TotalTrials<637){
+birthSamp(birthdays, n=35)
+  print(BWinCount)
+  print(BLoseCount) 
+  print(TotalTrials)
+if(TotalTrials=637){
+  stop_for_problems()
+}else {
+birthSamp(birthdays, n=35)
+birthSamp(birthdays, n=35)
+birthSamp(leap_birthdays, n=35)}
+}
+eval.parent(substitute(jn <- jn + 1))
+winanswer[j] <- BWinCount
+loseanswer[j] <- BLoseCount
+savebank[j] <- ((BWinCount*2) - BLoseCount)
+}
+}
+
+
+hist(winanswer)
+mean(winanswer)
+
+hist(savebank)
+mean(savebank)
+```
+1,000 batches of 637 trials seems to be sufficient in making a normal distribution, the average number of Barnlow wins being `mean(winanswer)`.  
+For an average number of wins, Barnlow will win `mean(savebank)`.  
+
+```{r}
+#savebank is the amount of money Barnlow has earned.  
+meanLosses = (637 - mean(winanswer))
+print(mean(winanswer))
+print(meanLosses)
+#knit and proofread
+```
+  
+This means that for any trial, the ratio of Barnlow winning to him losing is `mean(winanswer)` : `meanLosses`, which can be simplified to `(mean(winanswer)/meanLosses)` :1 or 1:  `(meanLosses/mean(winanswer))`.  
+However, a fair odds ratio must have all its possibilities add up to 1. Thus, the fair odds ratio is `(mean(winanswer)/637)` : `(meanLosses/637)` for all intents and purposes.  
+A fair bet would be set up so that, for every $1 he bets, you'd bet `(mean(winanswer)/meanLosses)`; in a 35- person class, 2:1 odds would be skewed in Brownlow's favor.  
+This is because he has a(n) `(mean(winanswer)/637)*100` percent chance of winning the bet in a class of 35 students.  
 
 # What size of class makes the 2:1 bet fair?  
 <!--Explain and display the results of your method of coming up with the estimate of professor Brownlows betting profits!-->
