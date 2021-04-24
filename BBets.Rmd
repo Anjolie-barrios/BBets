@@ -1,7 +1,7 @@
 ---
 title: "Brownlows Bets"
 author: "Anjolie Barrios"
-date: "Year 2020"
+date: "20 April 2021"
 output: 
   html_document:
     number_sections: true
@@ -32,25 +32,26 @@ inc <- function(x)
 
 <!--In this section you explain what you are trying to show.  Where did the data come from?  What is the research or other question you are trying to answer?!-->
 
- At the first day of class there are 35 students in Math Statistics class and professor Brownlow always proposes this bet to his students "I will wager $2 to your bet of $1 that at least two people in today's class have  the same birthday.  He tells me he has made that bet 637 times so far. Where do you think his profits are? Discuss this in a markdown document
+ At the first day of class there are 35 students in Math Statistics class and professor Brownlow always proposes this bet to his students "I will wager $2 to your bet of $1 that at least two people in today's class have  the same birthday".  He tells me he has made that bet 637 times so far.  
  
-Report git commit structure:
-There are 3 questions and there should be at least 3 separate commits, at least one dealing with each of the 3 questions.
-1. What are the fair odds for a bet on matching birthdays in a 35 person class.
-2. For what size class is a 2:1 odds bet fair.
-3. How much money would Brownlow be expected to end up with if the bets went as described.
+There are 3 questions to answer:  
+1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
+2. For what size class is a 2:1 odds bet fair?  
+3. How much money would Brownlow be expected to end up with if the bets went as described?  
 
-# What are the fair odds: Methods
+# What are the fair odds? and Methods
 <!--Decide on your methods:  In this section explain the approach you will take to attack the issue --- how will you decide on a likely estimate of professor Brownlow's earnings or losses after 637 bets. Also explain how you construct a 95% confidence interval about your estimate of his winnings !-->
 When there 35 people in the class, there are 36 possibilities:  
-P(0) = no one shares birthdays.  
-P(1) = 1 person "shares" a birthday with themselves. In reality, no shares birthdays. 
-P(2) = 2 people have shared birthdays.  
-P(3) = 3 people have shared birthdays, and so on, until
-P(35) = everyone has the same birthday.  
+P(0) = No one shares birthdays, since every birthday is unique.  
+P(1) = 1 person "shares" a birthday with themselves. In reality, no one shares birthdays.  
+P(2) = 2 people have shared birthdays (34 unique birthdays).  
+P(3) = 3 people have shared birthdays (32 unique birthdays).  
+P(4) = 4 people share a birthday, or there are 2 pairs of different shared birthdays (in any case, only 31 people have unique birthdays).  
+P(5) = There are only 30 unique birthdays. This could be from a pair of matching birthdays (eg. both June 9) and a triplet of matching birthdays (eg. all June 20), or it could be 5 people with the same birthday, but the bottom line is that there are only 30 unmatching birthdays. This goes on until...  
+P(35) = everyone has the same birthday, or there's any other combination of pairs, triplets, etc. that make for no unmatching birthdays.  
   
 Prof. Barlow, however, is betting on AT LEAST two people having matching birthdays, so the chance we want to calculate is actually P(at least 2) or P(2+).  Knowing P(0,1) will complete the equation below.  
-P(2+) = 1 - P(0,1), since P(2+) is the converse of P(0,1)  
+P(2+) = 1 - P(0,1), since P(2+) is the converse of P(0,1).  
   
 To find P(0,1):    
 There are exactly 365.24 days of the year, so the first person has a 1/365.24 chance of having a certain birthday. The next person has a 1/364.24 chance of a UNIQUE birthday (since 1 bday was already taken). When n = the number of students, the process continues to make this equation:  
@@ -60,22 +61,14 @@ Note that part of the equation is 366.24 - n. This is a simplification of 365.24
 After P(2+) is found for n = 35, the number of successful bets can be estimated using the number of total bets, which is 637. (Note that P(2+) is a value between 0 and 1.)  
 Successful bets = P(2+) * 637  
   
-For every success, he gets $2. For every fail, he loses $1. If S = number of successful bets and F = number of failed bets, then:  
-2S - F = net amount of money gained/lost, in dollars.  
+For every bet Brownlow wins, he gets a dollar (and you lose one). For every bet he loses, he loses $2 (and you take them).  
+If 'BWinCount' = number of times Brownlow wins and BLoseCount = number of times he loses, then:  
+(BLoseCount*2) - BWinCount = YOUR Savebank, henceforth 'savebankYou'.  
+BWinCount - (BLoseCount*2) = HIS Savebank, henceforth 'savebankB'.  
+  
+In order to answer our questions with a 95% confidence interval, we need to use a resampling approach that counts the number of times Barnlow wins or loses as well as the amount of money saved up or lost over time (this variable will be called 'savebankYou' or 'saveBankB').  
 
-In order to calculate 95% confidence interval, we need to put the info into a dataset with these variables: n or No_ofStudents, P(0,1) or betFail_chance, P(2+) or betWin_chance, successfulBets, failedBets, and netProfit. More importantly, however, we will use a resampling approach.  
-
-## 1. What are the fair odds for a bet on matching birthdays in a 35 person class?  
-### odds by calculation
-0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
-This is because the fair odds of any P are (1-P):P. It can also be written as 1858292:8141708, rounded to ~19: ~81, and rounded again to be 1:4.  
-### odds by automated trials
-```{r}
-#set counts to zero
-BWinCount = 0
-BLoseCount = 0
-TotalTrials = 0
-```
+## Methods: defining the BirthSamp function
 
 ```{r}
 #define "birthdays"
@@ -98,7 +91,7 @@ BrownlowWin = TRUE
 BrownlowWin = FALSE
 }
 
-#win/lose counts. For some reason they have to be "switched", otherwise "lose count" will show wins and vice versa. 
+#win/lose counts. For some reason they have to be "switched", otherwise "lose count" will show wins & vice versa. 
 if (!isTRUE(BrownlowWin)) {
 eval.parent(substitute(BLoseCount <- BLoseCount + 1))
 }else {
@@ -109,24 +102,42 @@ eval.parent(substitute(TotalTrials <- TotalTrials + 1))
 }
 ```
 
+# What are the fair odds for matching birthdays in a 35 person class?  
+
+### odds by calculation
+
+0.1858292 : 0.8141708 is the fair odds for a bet on matching birthdays, P(2+).  
+This is because the fair odds of any P are (1-P):P. It can also be written as 1: 4.3813, by dividing both parts of the ratio by ~0.1814.   For every win, Brownlow gets a dollar, and you get $4.38 every time he loses.  
+
+### odds by automated trials
+
+```{r}
+#set counts to zero
+BWinCount = 0
+BLoseCount = 0
+TotalTrials = 0
+```
+
 ```{r}
 #for every 3 "normal" years, 1 leap year
-birthSamp(birthdays, n=35)
-birthSamp(birthdays, n=35)
-birthSamp(birthdays, n=35)
-birthSamp(leap_birthdays, n=35)
+#birthSamp(birthdays, n=35)
+#birthSamp(birthdays, n=35)
+#birthSamp(birthdays, n=35)
+#birthSamp(leap_birthdays, n=35)
 
 #No. of times Barnlow has won and lost.
-print(BWinCount)
-print(BLoseCount)
-print(TotalTrials)
+#print(BWinCount)
+#print(BLoseCount)
+#print(TotalTrials)
 
 #j = num of batches
 j = 0
-jn = 0
 
 winanswer=vector("numeric")
-while(jn<1001){
+loseanswer=vector("numeric")
+savebankYou=vector("numeric")
+savebankB=vector("numeric")
+
 for(j in 1:1000){
 BWinCount = 0
 BLoseCount = 0
@@ -134,56 +145,200 @@ TotalTrials = 0
 #batch of 637 trials
 while (TotalTrials<637){
 birthSamp(birthdays, n=35)
-  print(BWinCount)
-  print(BLoseCount) 
-  print(TotalTrials)
-if(TotalTrials=637){
-  stop_for_problems()
-}else {
+  #nested 'while' code is to include leap years. Since 637/4 has a remainder of 1, this is about the closest we can get; the calculated odds should be 4.3813:1 when the number of days per year is exactly 365.24
+while(TotalTrials<637){
 birthSamp(birthdays, n=35)
 birthSamp(birthdays, n=35)
-birthSamp(leap_birthdays, n=35)}
+birthSamp(leap_birthdays, n=35)
 }
-eval.parent(substitute(jn <- jn + 1))
+}
+
 winanswer[j] <- BWinCount
 loseanswer[j] <- BLoseCount
-savebank[j] <- ((BWinCount*2) - BLoseCount)
-}
+#savebank repr. how much money you win or lose. 
+savebankYou[j] <- ((BLoseCount*2) - BWinCount)
+#repr. how much money Brownlow wins or loses. 
+savebankB[j] <- (BWinCount - (BLoseCount*2))
 }
 
 
 hist(winanswer)
-mean(winanswer)
+hist(savebankB)
 
-hist(savebank)
-mean(savebank)
-```
-1,000 batches of 637 trials seems to be sufficient in making a normal distribution, the average number of Barnlow wins being `mean(winanswer)`.  
-For an average number of wins, Barnlow will win `mean(savebank)`.  
-
-```{r}
-#savebank is the amount of money Barnlow has earned.  
+winanswer1 <- mean(winanswer)
+  print(mean(winanswer))
 meanLosses = (637 - mean(winanswer))
-print(mean(winanswer))
-print(meanLosses)
-#knit and proofread
+  print(meanLosses)
+print(mean(savebankYou))
+savebank1 <- mean(savebankB)
+  print(mean(savebankB))
 ```
   
-This means that for any trial, the ratio of Barnlow winning to him losing is `mean(winanswer)` : `meanLosses`, which can be simplified to `(mean(winanswer)/meanLosses)` :1 or 1:  `(meanLosses/mean(winanswer))`.  
-However, a fair odds ratio must have all its possibilities add up to 1. Thus, the fair odds ratio is `(mean(winanswer)/637)` : `(meanLosses/637)` for all intents and purposes.  
-A fair bet would be set up so that, for every $1 he bets, you'd bet `(mean(winanswer)/meanLosses)`; in a 35- person class, 2:1 odds would be skewed in Brownlow's favor.  
-This is because he has a(n) `(mean(winanswer)/637)*100` percent chance of winning the bet in a class of 35 students.  
+1,000 batches of 637 trials seems to be sufficient in making a normal distribution, the average number of Brownlow wins being `r winanswer1`.  
+For an average number of wins with the odds 2:1, Brownlow will gain `r savebank1` dollars after 637 trials.  
+  
+This means that for any trial, the ratio of Barnlow winning to him losing is `r winanswer1`:`r meanLosses`, which can be simplified to `r (mean(winanswer)/meanLosses)`:1 or 1:`r (meanLosses/mean(winanswer))`.   
+He has a(n) `r (mean(winanswer)/637)*100` percent chance of winning the bet in a class of 35 students; thus 2:1 odds would be skewed in Brownlow's favor.  
+
+A fair bet ratio would be set up so that, for every $1 that you bet, he'd bet (and risk losing) `r (mean(winanswer)/meanLosses)`, which is just over 4 dollars. The ratio for this would be `r (mean(winanswer)/meanLosses)`:1.  
+
+#### testing my conclusion
+
+```{r}
+j = 0
+
+winanswer=vector("numeric")
+loseanswer=vector("numeric")
+savebankYou=vector("numeric")
+savebankB=vector("numeric")
+
+
+for(j in 1:1000){
+BWinCount = 0
+BLoseCount = 0
+TotalTrials = 0
+#batch of 637 trials
+while (TotalTrials<637){
+birthSamp(birthdays, n=35)
+  #nested 'while' code is to include leap years. Since 637/4 has a remainder of 1, this is about the closest we can get; the calculated odds should be 4.3813:1 when the number of days per year is exactly 365.24
+while(TotalTrials<637){
+birthSamp(birthdays, n=35)
+birthSamp(birthdays, n=35)
+birthSamp(leap_birthdays, n=35)
+}
+}
+
+winanswer[j] <- BWinCount
+loseanswer[j] <- BLoseCount
+#savebank repr. how much money you win or lose. 
+savebankYou[j] <- ((BLoseCount*4.385) - BWinCount)
+#repr. how much money Brownlow wins or loses. 
+savebankB[j] <- (BWinCount - (BLoseCount*4.385))
+}
+```
+
+```{r}
+hist(winanswer, main="Brownlow's Wins", xlab="wins", ylab="frequency")
+hist(savebankB, main="Brownlow's Profits", xlab="profits", ylab="frequency")
+
+winanswer1.5 <- mean(winanswer)
+  print(mean(winanswer))
+meanLosses = (637 - mean(winanswer))
+  print(meanLosses)
+print(mean(savebankYou))
+savebank1.5 <- mean(savebankB)
+  print(mean(savebankB))
+
+#this is for later.
+q1summ <- summary(savebankB)
+q1sort <- sort(savebankB)
+```
+
+For my hypothesis to be correct, savebank would be at or near 0, meaning that, in the long run, Brownlow wouldn't gain or lose money. The above code uses 1: 4.385 odds and yields a savebank of `r savebank1.5`.  
+
+```{r}
+results35 <- matrix(c(4.35,1.59655,4.38,0.2985, 4.38, 2.6928, 4.3805,-1.88057, 4.381,1.26, 4.381,0.7075, 4.3813,0.338397, 4.39,-3.2727, 4.4,0.34,4.41,-6.9198,4.45,-7.686),ncol=2,byrow=TRUE)
+colnames(results35) <- c("$/loss","MeanSavebankB")
+print(results35)
+```
+  
+When the number of days per year is exactly 365.24, the calculated bet is 4.3813:1, which was proven more or less accurate.  
+Fair odds, as tested by the code, appears to be between 4.38:1 and 4.4:1. Since leap years don't have the same impact in my code as in my calculated prediction, I expected the fair odds to be different in testing. It's unknown if the shown variation is a result of this or from sheer chance.  
 
 # What size of class makes the 2:1 bet fair?  
+
 <!--Explain and display the results of your method of coming up with the estimate of professor Brownlows betting profits!-->
 
+I predicted the fair number of students to be 17 or 18, leaning towards 18.  
+
+```{r}
+j = 0
+
+winanswer=vector("numeric")
+loseanswer=vector("numeric")
+savebankYou=vector("numeric")
+savebankB=vector("numeric")
+
+for(j in 1:1000){
+BWinCount = 0
+BLoseCount = 0
+TotalTrials = 0
+#batch of 637 trials
+while (TotalTrials<637){
+birthSamp(birthdays, n=28)
+  #nested 'while' code is to include leap years. Since 637/4 has a remainder of 1, this is about the closest we can get. 
+while(TotalTrials<637){
+birthSamp(birthdays, n=28)
+birthSamp(birthdays, n=28)
+birthSamp(leap_birthdays, n=28)}
+}
+
+winanswer[j] <- BWinCount
+loseanswer[j] <- BLoseCount
+#savebank repr. how much money you win or lose. 
+savebankYou[j] <- ((BLoseCount*2) - BWinCount)
+#repr. how much money Brownlow wins or loses. 
+savebankB[j] <- (BWinCount - (BLoseCount*2))
+}
+```
+
+```{r}
+hist(winanswer, main="Brownlow's Wins", xlab="wins", ylab="frequency")
+hist(savebankB, main="Brownlow's Profits", xlab="profits", ylab="frequency")
+
+winanswer2 <- mean(winanswer)
+print(mean(winanswer))
+mean(savebankYou)
+savebank2 <- mean(savebankB)
+print(mean(savebankB))
+
+#this is for later.
+q2summ <- summary(savebankB)
+q2sort <- sort(savebankB)
+```
+  
+```{r}
+N_results <- matrix(c(15,-792.392,
+    20,-488.597,25,-189.275, 27, -76.817, 28, -24.734, 28, -21.65, 29, 27.463, 29, 27.028, 30, 74.548
+),ncol=2,byrow=TRUE)
+colnames(N_results) <- c("Students","MeanSavebankB")
+print(N_results)
+```
+  
+My prediction proved to be incorrect (since 17-18 students didn't yield a savebank at ~0). The fair amount of students is around 28 or 29. Most likely, my mistake was that I was running 1:2 odds trials instead of 2:1 trials. The above histograms use n= 28 students, which leaves Brownlow's savebank at `r savebank2` dollars.  
+-24.734 and -21.65 are closer to 0 than 27.463 and 27.028, so 28 students is fairer than 29.  
 
 # In the class and payoff as described what is a 95% confidence interval for Brownlow's earnings?
   
 <!--Explain and display your method of coming up with a 95% confidence interval of  professor Brownlows winnings (or losings)-->
 
+## For question 1
 
+```{r}
+print(q1summ)
+#since we did 1000 batches
+q1sort[25]
+q1sort[975]
+```
+  
+The last two values are the 25th and 975th values of savebank, after being sorted.  
+This represents the bounds of a 95% confidence interval in 1000 batches. 950 values (975-25) is 95% of the batches; 2.5% of the lowest batches (25 of them) and 2.5% of the highest batches (another 25) were snipped off.  
+With 4.385:1 odds, we can say with 95% confidence that Brownlow will gain between `r q1sort[25]` and `r q1sort[975]` dollars.  
+  
+## For question 2
+
+```{r}
+print(q2summ)
+#since we did 1000 batches
+q2sort[25]
+q2sort[975]
+```
+  
+The last two values are the 25th and 975th values of savebank, after being sorted.  
+This represents the bounds of a 95% confidence interval in 1000 batches. 950 values (975-25) is 95% of the batches; 2.5% of the lowest batches (25 of them) and 2.5% of the highest batches (another 25) were snipped off.  
+With 28 students, we can say with 95% confidence that Brownlow will gain between `r q2sort[25]` and `r q2sort[975]` dollars.  
+  
 # Discussion and Conclusion
 
 <!--Discussion and conclusion here.  If professor Brownlow is consistantly making or losing money how could he change his payout so that his profits center on zero?  Also discuss what size his class should be in order to have his current scheme balance at zero profit.!-->
-
+Given that there are 35 students with 2:1 odds, Brownlow is consistently making money. He could increase his payout to 4.38 or 4.40 dollars to even the odds, given that there are 35 students. For his current scheme to balance at around $0 in profit, the class should be at a size of 28 or 29 students.  
