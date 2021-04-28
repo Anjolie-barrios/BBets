@@ -11,12 +11,9 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
-require(tidyverse)
 require(knitr)
-require(rlang)
 require(mosaic)
 require(lattice)
-read.csv(file = "BbetsFinal.csv")
 
 #define increment function
 inc <- function(x)
