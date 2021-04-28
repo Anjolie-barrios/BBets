@@ -169,6 +169,9 @@ meanLosses = (637 - mean(winanswer))
 print(mean(savebankYou))
 savebank1 <- mean(savebankB)
   print(mean(savebankB))
+
+firstSumm <- summary(savebankB)
+firstSort <- sort(savebankB)
 ```
   
 1,000 batches of 637 trials seems to be sufficient in making a normal distribution, the average number of Brownlow wins being `r winanswer1`.  
@@ -309,6 +312,19 @@ My prediction proved to be incorrect (since 17-18 students didn't yield a saveba
   
 <!--Explain and display your method of coming up with a 95% confidence interval of  professor Brownlows winnings (or losings)-->
 
+## for 35 students at 2:1 odds
+
+```{r}
+print(firstSumm)
+
+firstSort[25]
+firstSort[975]
+```
+  
+The last two values are the 25th and 975th values of savebank, after being sorted.  
+This represents the bounds of a 95% confidence interval in 1000 batches. 950 values (975-25) is 95% of the batches; 2.5% of the lowest batches (25 of them) and 2.5% of the highest batches (another 25) were snipped off.  
+With 35 students and 2:1 odds, we can say with 95% confidence that Brownlow will gain between `r firstSort[25]` and `r firstSort[975]` dollars.  
+
 ## For question 1
 
 ```{r}
@@ -319,7 +335,6 @@ q1sort[975]
 ```
   
 The last two values are the 25th and 975th values of savebank, after being sorted.  
-This represents the bounds of a 95% confidence interval in 1000 batches. 950 values (975-25) is 95% of the batches; 2.5% of the lowest batches (25 of them) and 2.5% of the highest batches (another 25) were snipped off.  
 With 4.385:1 odds, we can say with 95% confidence that Brownlow will gain between `r q1sort[25]` and `r q1sort[975]` dollars.  
   
 ## For question 2
