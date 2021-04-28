@@ -162,8 +162,8 @@ savebankB[j] <- (BWinCount - (BLoseCount*2))
 }
 
 
-hist(winanswer)
-hist(savebankB)
+hist(winanswer, main="Brownlow's Wins", xlab="wins", ylab="frequency")
+hist(savebankB, main="Brownlow's Profits", xlab="profits", ylab="frequency")
 
 winanswer1 <- mean(winanswer)
   print(mean(winanswer))
